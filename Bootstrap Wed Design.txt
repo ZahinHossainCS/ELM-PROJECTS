@@ -1,0 +1,392 @@
+import Set
+import Bootstrap.Form.Input as Input
+import Html.Events as Events
+
+--this appears at the top of the browser screen (or on the tab)
+title : String
+title = "Primates Species"
+
+blankLine = Grid.row [] --this is an empty row (to add blank space)
+[ Grid.col []
+[ Html.h6[Spacing.my3][] --change spacing number to make empty row bigger or smaller (0-5)
+]
+]
+
+page : Model -> List (Html Msg)
+page model =
+[ Grid.container [] -- Wrap in a container to center the navbar
+[ Navbar.config NavbarMsg
+|> Navbar.withAnimation
+|> Navbar.collapseMedium -- Collapse menu at the medium breakpoint
+|> Navbar.info -- Customize coloring
+|> Navbar.brand -- Add logo to your brand with a little styling to align nicely
+[ href "#" ]
+[ Html.img
+[ src "https://image.flaticon.com/icons/png/512/2498/2498590.png"
+, class "d-inline-block align-top"
+, style "width" "80px"
+]
+[]
+]
+|> Navbar.items
+[ Navbar.itemLink
+[ href "#" ] [ Html.text "Primates Species" ],
+Navbar.itemLink
+[ href "https://en.wikipedia.org/wiki/Africa" ] [ Html.text "Africa" ],
+Navbar.itemLink
+[ href "$" ] [ Html.text "Useless link" ]
+, Navbar.dropdown
+{ id = "mydropdown"
+, toggle = Navbar.dropdownToggle [] [ Html.text "Species" ]
+, items = [ Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Blue_monkey" ] [ Html.text "Blue Monkey" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Chimpanzee" ] [ Html.text "Chimpanzee" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Emperor_tamarin" ] [ Html.text "Emperor Tamarin" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Gelada" ] [ Html.text "Gelada" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Golden_lion_tamarin" ] [ Html.text "Golden Lion Tamarin" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Indri" ] [ Html.text "Indri" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Philippine_tarsier" ] [ Html.text "Philippine Tarsier" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Proboscis_monkey" ] [ Html.text "Proboscis Monkey" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Ring-tailed_lemur" ] [ Html.text "Ring-Tailed Lemur" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Sumatran_orangutan" ] [ Html.text "Sumatran Orangutan" ],
+Navbar.dropdownItem [ href "https://en.wikipedia.org/wiki/Western_gorilla" ] [ Html.text "Western Gorilla" ]
+]
+}
+]
+|> Navbar.customItems
+[ Navbar.formItem []
+[ Input.text [ Input.attrs [placeholder "Primate Search", value model.searchString, Events.onInput UpdateSearch ]]
+]
+]
+|> Navbar.view model.navbarState
+]
+-- Carousel -- The Carousel dissapears after it loops through the refined search
+,Html.h2 [] [Html.text ""]
+, Html.h2 [] [Html.text ("monkeys")]
+,Carousel.config (CarouselMsg 0 {-the id number of the Carousel-}) [style "height" "500px" ]
+|> Carousel.slides (carouselList (search model.searchString) model)
+
+|> Carousel.withIndicators
+|> Carousel.view (carouselState 0 model.carouselStates)
+
+
+,dispAccord (search model.searchString) model
+
+]
+
+numAccordions = 1
+numCarousels = 1
+numPopUps = 1
+
+cardList : (List Primate) -> Model -> (List (Accordion.Card msg))
+cardList l m = case l of
+p :: ps -> if ps == [] then
+[Accordion.card
+{ id = p.name --each accordion card needs an id
+, options = []
+, header =
+Accordion.header [] <| Accordion.toggle [] [ Html.text p.name ]
+, blocks =
+[ Accordion.block []
+[ Block.text [] [ Html.text p.text ] ]
+]
+}]
+else
+[Accordion.card
+{ id = p.name --each accordion card needs an id
+, options = []
+, header =
+Accordion.header [] <| Accordion.toggle [] [ Html.text p.name ]
+, blocks =
+[ Accordion.block []
+[ Block.text [] [ Html.text p.text ] ]
+]
+}] ++ cardList ps m
+
+[] -> [Accordion.card
+{ id = " " --each accordion card needs an id
+, options = []
+, header =
+Accordion.header [] <| Accordion.toggle [] [ Html.text " " ]
+, blocks =
+[ Accordion.block []
+[ Block.text [] [ Html.text " " ] ]
+]
+}]
+
+carouselList : (List Primate) -> Model -> List (Slide.Config msg)
+carouselList l m = case l of
+p :: ps -> [Slide.config [] (image "500px" p.pic)] ++ carouselList ps m
+[] -> []
+
+dispAccord : (List Primate) -> Model -> (Html Msg)
+dispAccord l m = if l == [] then
+Html.text ""
+else
+Accordion.config (AccordionMsg 0) -- the ID number of the accordion
+|> Accordion.withAnimation
+|> Accordion.cards
+(cardList l m)
+|> Accordion.view (accordionState 0 {-same id as above-} m.accordionStates)
+
+--Searches apelist for a search terms, each term being separated by a space. so "big monkey chimp"
+--would be ["big","monkey","chimp"], all of which need to be searched.
+search : String -> (List Primate)
+search s = let
+stringList = String.split " " s
+pListDupe = List.concat (List.map (\x -> findMatches x apelist) stringList)
+in
+toUniqueList pListDupe
+
+--method to make a list of elements unique
+toUniqueList : (List a) -> (List a)
+toUniqueList a = case a of
+(x::xs) -> if List.member x xs then toUniqueList xs else [x] ++ toUniqueList xs
+[] -> []
+
+
+--finds how many primates match one given searchstring
+findMatches : String -> (List Primate) -> (List Primate)
+findMatches s pl = case pl of
+(p :: ps) -> if pings s p then
+[p] ++ findMatches s ps
+else
+findMatches s ps
+[] -> []
+
+--checks if a string points to a given primate
+pings : String -> Primate -> Bool
+pings s p = if (String.contains (String.toLower s) (String.toLower p.searchTerms)) || (String.contains (String.toLower s) (String.toLower p.name)) || (String.contains (String.toLower s) (String.toLower p.text)) then
+True
+else
+False
+
+--Monkey type 0 inexed alphabetically
+type alias Primate = {
+name : String,
+searchTerms : String,
+pos : Int,
+text : String,
+pic : String
+}
+
+--our primates
+blueMonkey = Primate "Blue Monkey" "blue monkey diademed Cercopithecus mitis Old World Central and East Africa" 0 "The blue monkey or diademed monkey is a species of Old World monkey native to Central and East Africa, ranging from the upper Congo River basin east to the East African Rift and south to northern Angola and Zambia. It sometimes includes Sykes', silver, and golden monkeys as subspecies. " "https://www.neprimateconservancy.org/uploads/1/5/3/8/15380094/blue-monkey-cercopithecus-mitis-stuhlmanni-pair-charlesjsharp-resize_1_orig.jpg"
+chimpanzee = Primate "Chimpanzee" "chimpanzee Pan troglodytes chimp Great ape Forest savannah tropical Africa" 1 "The chimpanzee, also known as the common chimpanzee, robust chimpanzee, or simply chimp, is a species of great ape native to the forest and savannah of tropical Africa. It has four confirmed subspecies and a fifth proposed subspecies. The chimpanzee and the closely related bonobo are classified in the genus Pan." "https://images.ctfassets.net/cnu0m8re1exe/6O7VpUELwpVrs5cGO10hQc/efd0a06bc8b4cbd23bbb3264a1567887/chimps1.jpg?w=650&h=433&fit=fill"
+emperorTamarin = Primate "Emperor Tamarin" "Emperor tamarin S.imperator Saguinus imperator" 2 "The emperor tamarin is a species of tamarin allegedly named for its resemblance to the German emperor Wilhelm II. It lives in the southwest Amazon Basin, in east Peru, north Bolivia and in the west Brazilian states of Acre and Amazonas." "https://www.adelaidezoo.com.au/wp-content/uploads/sites/2/animals/2017/05/EmperorTamarinSlider.jpg"
+gelada = Primate "Gelada" "bleeding heart monkey baboon old world monkey ethiopian highlands" 3 "The gelada, sometimes called the bleeding-heart monkey or the gelada \"baboon\", is a species of Old World monkey found only in the Ethiopian Highlands, with large populations in the Simien Mountains. Geladas are actually not baboons but the only living members of the genus Theropithecus." "https://critter.science/wp-content/uploads/2018/12/gelada1.jpg"
+goldenLionTamarin = Primate "Golden lion tamarin" "golden yellow lion tamarin leontopithecus rosalia marmoset new callitrichidae" 4 "The golden lion tamarin, also known as the golden marmoset, is a small New World monkey of the family Callitrichidae. Native to the Atlantic coastal forests of Brazil, the golden lion tamarin is an endangered species." "https://plug.plugon.us/img/d/db0/db080086a10440a291f955ec700c6438/img1.jpg"
+indri = Primate "Indri" "lemur indri endrina diurnal clinal sifaka" 5 "The indri, also called the babakoto, is one of the largest living lemurs, with a head-and-body length of about 64–72 cm and a weight of between 6 to 9.5 kg. It has a black and white coat and maintains an upright posture when climbing or clinging." "https://media-cdn.tripadvisor.com/media/photo-s/15/07/1c/37/indri-indri-these-make.jpg"
+philippineTarsier = Primate "Philippine tarsier" "Philippine tarsier tarsus Carlito C. syrichta" 6 "The Philippine tarsier, known locally as mawumag in Cebuano and other Visayan languages, and magô in Waray, is a species of tarsier endemic to the Philippines. " "https://afar-production.imgix.net/uploads/images/post_images/images/MDt7bVZaQp/original_fc3619bf9330ee4ddc178bba85e56b79.jpg?1522276881?ixlib=rails-0.3.0&auto=format%2Ccompress&crop=entropy&fit=crop&h=719&q=80&w=954"
+proboscisMonkey = Primate "Proboscis monkey" "Proboscis monkey Nasalis Colobinae" 7 "The proboscis monkey or long-nosed monkey is an arboreal Old World monkey with an unusually large nose, a reddish-brown skin color and a long tail. It is endemic to the southeast Asian island of Borneo and is found mostly in mangrove forests and on the coastal areas of the island. " "https://media.tacdn.com/media/attractions-content--1x-1/0b/39/96/85.jpg"
+lemur = Primate "Ring-tailed lemur" "ring tailed lemur Lemuridae strepsirrhine primate Linnaeus" 8 "Lemurs are mammals of the order Primates, divided into 8 families and consisting of 15 genera and around 100 existing species. They are native only to the island of Madagascar. Most existing lemurs are small, have a pointed snout, large eyes, and a long tail. They chiefly live in trees, and are active at night." "https://nationalzoo.si.edu/sites/default/files/animals/20110407-071mm.jpg"
+sumatranOrangutan = Primate "Sumatran Orangutan" "Sumatran orangutan Sumatra Pongo Nonja" 9 "The Sumatran orangutan is one of the three species of orangutans. Found only in the north of the Indonesian island of Sumatra, it is rarer than the Bornean orangutan but more common than the recently identified Tapanuli orangutan, also found in Sumatra." "https://www.zoo-leipzig.de/fileadmin/_processed_/c/f/csm_Sumatra-Orang-Utan_6_e190cb5ff5.jpg"
+westernGorilla = Primate "Western Gorilla" "great ape western gorilla Harambe Koko Jambo" 10 "The western gorilla is a great ape—the type species as well as the most populous species of the genus Gorilla." "https://nationalzoo.si.edu/sites/default/files/animals/lowlandgorilla-002.jpg"
+
+--list of the above
+apelist = [blueMonkey, chimpanzee, emperorTamarin, gelada, goldenLionTamarin, indri, philippineTarsier, proboscisMonkey, lemur, sumatranOrangutan, westernGorilla]
+
+
+
+type alias Model =
+{ navKey : Navigation.Key
+, page : Page
+, time : Float
+, navbarState : Navbar.State
+, accordionStates : Dict Int Accordion.State --ADD ACCORDION
+, carouselStates : Dict Int Carousel.State -- ADD CAROUSEL
+, modalVisibilities : Dict Int Modal.Visibility -- ADD MODAL
+, searchString : String
+, searchList : List String
+}
+
+type Page
+= Home
+| NotFound
+
+type Msg
+= UrlChange Url
+| ClickedLink UrlRequest
+| NavbarMsg Navbar.State
+| NoOp
+| AccordionMsg Int Accordion.State --ADD ACCORDION
+| CarouselMsg Int Carousel.Msg --ADD CAROUSEL
+| CloseModal Int
+| ShowModal Int
+| Tick Float
+| UpdateSearch String
+
+init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
+init flags url key =
+let
+( navbarState, navCmd ) =
+Navbar.initialState NavbarMsg
+
+( model, urlCmd ) =
+urlUpdate url { navKey = key
+, navbarState = navbarState
+, page = Home
+, time = 0
+, accordionStates = Dict.fromList <| List.map (\n -> (n,Accordion.initialStateCardOpen "")) (List.range 0 (numAccordions-1)) --ADD ACCORDION - what does accordion look like when you open the page?
+--Accordion.initialStateCardOpen "card1" -- if you put a card id, the accordion starts with that card open
+, carouselStates = Dict.fromList <| List.map (\n -> (n,Carousel.initialState)) (List.range 0 (numCarousels-1))
+, modalVisibilities = Dict.fromList <| List.map (\n -> (n,Modal.hidden)) (List.range 0 (numPopUps-1))
+, searchString = ""
+, searchList = []
+}
+in
+( model, Cmd.batch [ urlCmd, navCmd ] )
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+--ADD ACCORDION - now that there are multiple subscriptions, they need to be grouped in Sub.batch
+Sub.batch [Navbar.subscriptions model.navbarState NavbarMsg
+, Sub.batch <| List.map (\(n, s) -> Accordion.subscriptions s (AccordionMsg n)) <| Dict.toList model.accordionStates
+, Sub.batch <| List.map (\(n, s) -> Carousel.subscriptions s (CarouselMsg n)) <| Dict.toList model.carouselStates
+, onAnimationFrame ( \ posix -> Tick ((Time.posixToMillis posix |> toFloat) * 0.001) )
+]
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+case msg of
+ClickedLink req ->
+case req of
+Browser.Internal url ->
+( model, Navigation.pushUrl model.navKey <| Url.toString url )
+
+Browser.External href ->
+( model, Navigation.load href )
+
+UrlChange url ->
+urlUpdate url model
+
+NavbarMsg state ->
+( { model | navbarState = state }
+, Cmd.none
+)
+
+NoOp -> (model, Cmd.none)
+
+--ADD ACCORDION
+AccordionMsg id state ->
+( { model | accordionStates = Dict.insert id state model.accordionStates }
+, Cmd.none
+)
+
+--ADD CAROUSEL
+CarouselMsg id cMsg ->
+( {model | carouselStates = Dict.update id
+(\m -> case m of
+Just s -> Just <| Carousel.update cMsg s
+Nothing -> Nothing
+) model.carouselStates
+
+}
+, Cmd.none
+)
+
+--ADD MODAL
+CloseModal id ->
+( { model | modalVisibilities = Dict.insert id Modal.hidden model.modalVisibilities } , Cmd.none )
+
+ShowModal id ->
+( { model | modalVisibilities = Dict.insert id Modal.shown model.modalVisibilities } , Cmd.none )
+
+Tick t -> ({ model | time = t }, Cmd.none)
+
+UpdateSearch str ->
+let searchString = String.filter filterChars str
+listWords = (String.split " " (String.toLower searchString))
+firstList = List.take ((List.length listWords)-1) listWords
+lastList = List.drop ((List.length listWords)-1) listWords
+searchList = (List.filter commonWrds firstList)++lastList --filter out common words only from fully typed keyword
+in
+({ model | searchString = searchString
+, searchList = searchList
+--, searching = True
+--, searchBeginT = if model.searching then model.searchBeginT else model.t
+--, searchContinuesT = model.t
+--, menuState = Closed
+}, Cmd.none )
+
+filterChars char = if Char.isLower char || Char.isUpper char || Char.isDigit char || char == ' ' then True else False
+
+commonWrds wrd = case wrd of
+"the" -> False
+"best" -> False
+"with" -> False
+"about" -> False
+"and" -> False
+"as" -> False
+"at" -> False
+"a" -> False
+"to" -> False
+"in" -> False
+"by" -> False
+"on" -> False
+"for" -> False
+"from" -> False
+"greatest" -> False
+"ever" -> False
+"school" -> False
+"grade" -> False
+"catholic" -> False
+"public" -> False
+"junior" -> False
+"senior" -> False
+"elementary" -> False
+"secondary" -> False
+"district" -> False
+"" -> False
+_ -> True
+
+resetViewport : Cmd Msg
+resetViewport =
+Task.perform (\_ -> NoOp) (Dom.setViewport 0 0)
+
+urlUpdate : Url -> Model -> ( Model, Cmd Msg )
+urlUpdate url model =
+case decode url of
+Nothing ->
+( { model | page = NotFound }, resetViewport )
+
+Just route ->
+( { model | page = route }, resetViewport )
+
+decode : Url -> Maybe Page
+decode url =
+{ url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
+|> UrlParser.parse routeParser
+
+routeParser : Parser (Page -> a) a
+routeParser =
+UrlParser.oneOf
+[ UrlParser.map Home top
+]
+
+view : Model -> Browser.Document Msg
+view model =
+{ title = case model.page of
+Home ->
+title
+
+NotFound ->
+"Page Not Found"
+, body =
+[
+Html.node "link" [attribute "rel" "stylesheet", href "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"] []
+, Html.node "link" [attribute "rel" "stylesheet", href "https://documents.mcmaster.ca/www/cdn/css/1.0/mcm-bw.css"] []
+, Html.div []
+[ mainContent model
+]
+]
+}
+
+mainContent : Model -> Html Msg
+mainContent model =
+Grid.container [] <| page model
+
+pageNotFound : List (Html Msg)
+pageNotFound =
+[ Html.h1 [Spacing.my4] [ Html.text "Not found" ]
+, Html.text "Sorry, couldn't find that page"
+]

@@ -1,0 +1,340 @@
+--Type Definitions
+type State = Waiting
+| Clicked1 (Int,(Float,Float))
+| Clicked2 (Int,(Float,Float)) (Int,(Float,Float))
+
+type alias Model = { time : Float
+, state : State
+, points : Dict.Dict Int (Float,Float)
+,chosen : Dict.Dict Int (Float,Float)
+, starttime : Float
+, started : Bool
+, matchlist : (List Int)
+, colour : Color
+--do not touch \/
+, nextRand : (List Int, Int)
+, debug : String
+--do not touch/\
+}
+
+type Msg = Tick Float GetKeyState
+| MDown (Int,(Float,Float))
+| Begin
+| CheckMatch (Int,Int)
+| CheckChosen (Int,Int)
+| CheckWin
+--do not touch\/
+| RandIdx (List Int, Int)
+--do not touch/\
+
+type alias Card = {
+disp : Stencil
+,pair : Int
+}
+
+--Drawing hitboxes after so it does not conflict with images
+drawHitboxes : Int -> (Float,Float) -> List (Shape Msg) -> List (Shape Msg)
+drawHitboxes idx (x,y) boxes = (rect 20 30 |> ghost |> move (x,y) |> notifyMouseDown (MDown (idx,(x,y)))) :: boxes
+
+drawHitbox : (Int, (Float,Float)) -> (Shape Msg)
+drawHitbox (idx,(x,y)) = (rect 20 30 |> ghost |> move (x,y) {- |> notifyMouseDown (MDown (idx,(x,y)))-})
+
+--checks if two cards match
+checkForMatch : List { disp : Shape userMsg, pair : Int } -> Int -> Int -> (List Int)
+checkForMatch cl a b = let
+testcard = {disp = (text "" |> filled black), pair = -1}
+ca = Maybe.withDefault testcard (List.head (List.drop a cl))
+cb = Maybe.withDefault testcard (List.head (List.drop b cl))
+
+in
+if (a /= b) && (b >= 0) && ((ca.pair == cb.pair) && (ca.pair /= -1)) then [a,b] else []
+
+--extracting an element from a list of states
+getCard : Int -> (List (Shape Msg)) -> Shape Msg
+getCard x l = fromJustCard( List.head (List.drop x l))
+
+--maybe resolver for color
+fromJustCard : (Maybe (Shape Msg)) -> Shape Msg
+fromJustCard x = case x of
+Just y -> y
+Nothing -> text "404" |> filled black |>scale 0.7 |> move (-7,-3)
+
+-- Add Cards Here
+cardFront = [c0.disp |>scale 0.02 |> move (-8,7),
+c1.disp |>scale 0.7 |> move (-7,-4),
+c2.disp |>scale 0.015 |> move (-8,6),
+c3.disp |>scale 0.7 |> move (-7,-4),
+c4.disp |>scale 0.0045 |> move (-9,9),
+c5.disp |>scale 0.7 |> move (-7,-4),
+c6.disp |>scale 0.015 |> move (-9,7),
+c7.disp |>scale 0.6 |> move (-9.2,-4),
+c8.disp |>scale 0.03 |> move (-7,6),
+c9.disp |>scale 0.7 |> move (-8,-4),
+c10.disp |>scale 0.008 |> move (-7,6),
+c11.disp |>scale 0.7 |> move (-7,-4),
+c12.disp |>scale 0.009 |> move (-9,6),
+c13.disp |>scale 0.35 |> move (-8,-2),
+c14.disp |>scale 0.007 |> move (-8,10),
+c15.disp |>scale 0.7 |> move (-9,-4),
+c16.disp |>scale 0.03 |> move (-9,0),
+c17.disp |>scale 0.7 |> move (-7,-4)
+]
+
+c0 = {
+disp=html 1200 1200 <| Html.img [Html.src "https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/19429/friendly-ginger-cat-clipart-md.png"][]
+,pair = 0 }
+
+c1 = { disp= (text "Cat" |> filled black)
+,pair = 0 }
+
+
+c2 = { disp=html 1200 1200 <| Html.img [Html.src "https://www.pinclipart.com/picdir/big/192-1925693_there-is-a-side-view-of-a-dog.png"][]
+,pair = 1 }
+
+c3 = { disp= (text "Dog" |> filled black)
+,pair = 1 }
+
+c4 = { disp=html 10000 10000 <| Html.img [Html.src "https://i.pinimg.com/originals/21/7d/d4/217dd476ba950732fef1b897099773ec.png"][]
+,pair = 2 }
+
+c5 = { disp= (text "Ball" |> filled black)
+,pair = 2 }
+
+c6 = {
+disp = html 1200 1200 <| Html.img [Html.src "https://www.clipartmax.com/png/full/2-23113_ringing-phone-clipart.png"] []
+,pair = 3
+}
+
+c7 = {
+disp = (text "Phone" |> filled black)
+,pair = 3
+}
+
+c8 = { disp=html 10000 10000 <| Html.img [Html.src "https://www.pinclipart.com/picdir/big/0-1245_pot-plant-clipart-pot-clip-art-potted-plant.png"][]
+,pair = 4 }
+
+c9 = { disp= (text "Plant" |> filled black)
+,pair = 4 }
+
+c10 = {
+disp = html 12000 12000 <| Html.img [Html.src "https://www.pinclipart.com/picdir/big/307-3076469_new-player-red-baseball-hat-clipart.png"] []
+,pair = 5
+}
+
+c11 = {
+disp = (text "Hat" |> filled black)
+,pair = 5
+}
+
+c12 = {
+disp = html 12000 12000 <| Html.img [Html.src "https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/33134/desktop-personal-computer-clipart-xl.png"] []
+,pair = 6
+}
+
+c13 = {
+disp = (text "Computer" |> filled black)
+,pair = 6
+}
+c14 = {
+disp = html 12000 12000 <| Html.img [Html.src "https://www.adazing.com/wp-content/uploads/2019/02/open-book-clipart-03.png"] []
+,pair = 7
+}
+
+c15 = {
+disp = (text "Book" |> filled black)
+,pair = 7
+}
+c16 = {
+disp = html 12000 12000 <| Html.img [Html.src "https://i.pinimg.com/originals/c6/1a/bd/c61abda57e280f45d8aaa0c128f365d9.png"] []
+,pair = 8
+}
+
+c17 = {
+disp = (text "Car" |> filled black)
+,pair = 8
+}
+
+clist = [c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17]
+
+--All this stuff is for drawing cards
+--Drawing the Cards from the list
+drawAt : Int -> (Float,Float) -> List (Shape Msg) -> List (Shape Msg)
+drawAt idx (x,y) cards =
+(rect 20 30 |> filled (rgb 200 250 250) |> move (x,y))
+:: cards
+
+drawChosen : Int -> (Float,Float) -> List (Shape Msg) -> List (Shape Msg)
+drawChosen idx (x,y) cards =
+((getCard idx cardFront)|> move (x,y))
+:: cards
+
+view : Model -> Collage Msg
+view model = collage 192 128
+<| Dict.foldl drawAt [] model.points ++
+Dict.foldl drawChosen [] model.chosen ++
+[text ("You Win") |>size 30 |>centered |> filled model.colour |> move (0,0)] ++
+
+(
+case model.state of
+Waiting ->[]
+Clicked1 (idx, (x,y)) ->
+[rect 192 168 |> ghost,
+rect 20 30
+|> outlined (solid 2) blue
+|> move (x,y)
+, ((getCard idx cardFront)|> move (x,y))
+]
+
+Clicked2 (idx, (x,y)) (idx2, (x2,y2)) ->
+[rect 192 168 |> ghost,
+rect 20 30
+|> outlined (solid 2) blue
+|> move (x,y)
+,((getCard idx cardFront)|> move (x,y))
+,rect 20 30
+|> outlined (solid 2) blue
+|> move (x2,y2)
+,((getCard idx2 cardFront)|> move (x2,y2))
+, rect 192 168 |> ghost |> notifyTap (MDown (idx,(x,y))) |> notifyTap (CheckMatch (idx,idx2)) |> notifyTap (CheckChosen (idx,idx2)) |> notifyTap CheckWin
+
+, group (List.map (\p -> drawHitbox p |> notifyTap (CheckMatch (idx,idx2))
+|> notifyTap (CheckChosen (idx,idx2))
+|> notifyTap CheckWin
+|> notifyTap (MDown (idx,(x,y))))
+(Dict.toList model.points))
+
+
+
+
+]
+
+
+
+
+) ++
+
+(
+case model.state of
+Waiting -> List.map (\a -> a |> notifyTap (CheckMatch (-1,-1))) ( Dict.foldl drawHitboxes [] model.points)
+Clicked1 (idx, (x,y)) -> List.map (\a -> a |> notifyTap (CheckMatch (idx,-1))) ( Dict.foldl drawHitboxes [] model.points)
+Clicked2 (idx, (x,y)) (idx2, (x2,y2)) -> []
+)
+++ [
+if model.started == False then
+group [
+rect 192 128 |> ghost --|> filled (rgb 200 250 200)
+,
+
+group [
+rect 50 20 |> filled (rgb 100 0 200) |> move (0,35),
+text "Begin" |> filled white |> move (-15,30)
+
+] |> move (0,-10) |> notifyTap Begin,
+group [
+rect 140 50 |> filled (rgb 100 0 200) |> move (0,-8),
+text "There are picture cards and word cards,"|> size 8 |> filled white |> move (-68,7),
+text "tap on any two cards to flip them over."|> size 8 |> filled white |> move (-68,-1),
+text "When you match the picture with the "|> size 8 |> filled white |> move (-68,-9),
+text "the corresponding english word they will"|> size 8 |> filled white |> move (-68,-17),
+text "remain face up. Match all cards to win!"|> size 8 |> filled white |> move (-68,-25),
+text "MEMORY" |>size 18 |>centered |>bold |> filled (rgb 100 0 200) |> move (0,56)
+] |> move (0,-10)
+
+]
+else group []
+
+]
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg m =
+let model = m
+in
+case msg of
+--DO NOT TOUCH DO NOT TOUCH \/\/\/
+RandIdx (idxsBad,correct) ->
+( { model | nextRand = ([],correct) }, Cmd.none )
+--DO NOT TOUCH DO NOT TOUCH /\ /\ /\
+
+Tick t _ ->
+case model.state of
+Waiting -> ({ model | time = t, starttime = if model.started == True then model.starttime else t} , Cmd.none)
+Clicked1 clickable -> ({ model | time = t, starttime = if model.started == True then model.starttime else t} , Cmd.none)
+Clicked2 clickable clicked -> ({ model | time = t, starttime = if model.started == True then model.starttime else t} , Cmd.none)
+
+
+MDown clickable ->
+case model.state of
+Waiting -> ({ model | state = Clicked1 clickable}, Cmd.none)
+Clicked1 clicked ->( { model | state = Clicked2 clickable clicked}, Cmd.none)
+otherwise -> ({model | state = Waiting}, Cmd.none)
+
+Begin -> ({model | started = True, points = (Dict.fromList ( swap2list 50 model.starttime (Dict.toList model.points))) }, Cmd.none)
+
+CheckMatch (a,b) -> ({model | matchlist = if List.member a model.matchlist || List.member b model.matchlist || (checkForMatch clist a b == [])
+then model.matchlist
+else (model.matchlist ++ (checkForMatch clist a b))
+}, Cmd.none)
+
+CheckChosen (c,d) -> ({model | chosen = if not(List.member c model.matchlist)
+then model.chosen
+else Dict.insert d (Maybe.withDefault (-200,-200) (Dict.get d model.points)) (Dict.insert c (Maybe.withDefault (-200,-200) (Dict.get c model.points)) model.chosen)
+}, Cmd.none)
+
+CheckWin -> ({ model | colour = if List.foldl (+) 0 model.matchlist == 153 then (rgb 100 0 200)
+else blank }, Cmd.none)
+
+
+--Initilization of Variables
+init : Model
+init = { time = 0
+, state = Waiting
+, starttime = 0
+, started = False
+, matchlist = []
+, points = Dict.fromList <| ((List.map ( \ idx -> (idx, ((toFloat idx * 30 - 75) , (25))))(List.range 0 5))++
+(List.map ( \ idx -> (idx, ((toFloat idx * 30 - 255) , (-10))))(List.range 6 11)) ++
+(List.map ( \ idx -> (idx, ((toFloat idx * 30 - 435) , (-45))))(List.range 12 17)))
+, chosen = Dict.fromList[]
+, colour = blank
+--do not touch \/
+, nextRand = ([-1,-1,-1,-1],0)
+, debug = ""
+--do not touch/\
+}
+
+swap2list :Int -> Float -> List (Int,(Float,Float)) -> List (Int,(Float,Float))
+swap2list n f list = case n of
+0 -> list
+_ ->
+let
+len = (List.length list - 2)
+x1t = round ((toFloat len)*(abs(sin f)))
+possiblyx2 = len*round (abs(sin (f+f)))
+x2t = if possiblyx2 /= x1t then possiblyx2 else modBy len (possiblyx2+1)
+
+x1 = if x1t < x2t then x1t else x2t
+x2 = if x1t > x2t then x1t else x2t
+
+
+oldpair1 = Maybe.withDefault (0,(0.0,0.0)) (List.head (List.drop x1 list))
+oldpair2 = Maybe.withDefault (0,(0.0,0.0)) (List.head (List.drop x2 list))
+
+
+newpair1 = (Tuple.first oldpair1, Tuple.second oldpair2)
+
+newpair2 = (Tuple.first oldpair2, Tuple.second oldpair1)
+
+finallist = List.take (x1) list ++ [newpair1] ++ List.drop (x1+1) (List.take x2 list)++ [newpair2] ++ List.drop (x2+1) list
+in
+swap2list (n-1) (f+f)finallist
+
+--DO NOT TOUCH THE BELOW OR IT BRICKS
+myTitle = "Memory"
+timeToDrop = 1
+halfToAppear = 5
+timeToAppear = 2 * halfToAppear
+letterWidth = 7
+
+getRandChoices = Random.generate RandIdx (Random.map5 ( \ i j k l c -> ([i,j,k,l],c) ) oneRandIdx oneRandIdx oneRandIdx oneRandIdx oneRandIdx)
+oneRandIdx = Random.int 0 0
+rand0to3 = Random.int 0 3

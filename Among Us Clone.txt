@@ -1,0 +1,954 @@
+import Random
+--Card Swipe
+type GreenLight = LightGreen | DarkGreen
+type RedLLight = LightRed | DarkRed
+
+greenLights gLight = case gLight of
+LightGreen -> DarkGreen
+DarkGreen -> LightGreen
+
+redLights rLight = case rLight of
+LightRed -> DarkRed
+DarkRed -> LightRed
+--Images for card swipe task
+mycons = roundedRect 60 10 4
+|> filled darkGray
+|> scale 2
+mycons1 = roundedRect 60 50 4
+|> filled (rgb 128 128 128)
+|> scale 2
+mycons3 = roundedRect 60 20 4
+|> filled darkGray
+|> scale 2
+mycons4 = rect 50 5
+|> filled darkGreen
+|> scale 2
+mycons5 = roundedRect 60 50 4
+|> filled black
+|> scale 2
+mycover= rect 15 6.66
+|> filled darkBrown
+|> scale 3.5
+myround = roundedRect 10 15 5
+|> filled (rgb 128 128 128)
+|> scale 2
+myrect = rect 10 10
+|> filled (rgb 128 128 128)
+|> scale 2
+myeye = roundedRect 8 4 1
+|> filled darkGray
+|> scale 2
+myshine = roundedRect 7 3 1
+|> filled white
+|> scale 2
+myjet = roundedRect 5 10 1
+|> filled (rgb 128 128 128)
+|> scale 2
+back1 = roundedRect 20 20 1
+|> filled gray
+|> scale 2
+back2 = roundedRect 70 40 1
+|> outlined (solid 1) black
+|> scale 2
+back3 = roundedRect 70 40 1
+|> filled white
+|> scale 2
+txt = text "Among Us"
+|> filled black
+|> scale 1
+sub = text "• Skin Color:"
+|> filled black
+|> scale 0.5
+sub1 = text "Gray"
+|> filled black
+|> scale 0.5
+sube = text "• Eye Color:"
+|> filled black
+|> scale 0.5
+sube1 = text "White"
+|> filled black
+|> scale 0.5
+subm = text "•Monkey?:"
+|> filled black
+|> scale 0.5
+subm1 = text "Yes"
+|> filled black
+|> scale 0.5
+wal = rect 15 10
+|> filled darkBrown
+|> scale 3.5
+wal2 = rect 15 6.66
+|> outlined (solid 0.2) black
+|> scale 3.5
+walout = rect 15 10
+|> outlined (solid 0.5) black
+|> scale 3.5
+walout2 = rect 15 3.33
+|> outlined (solid 0.2) black
+|> scale 3.5
+mid = rect 2 10
+|> filled darkBrown
+|> scale 3.5
+midout = rect 2 10
+|> outlined (solid 0.2) black
+|> scale 3.5
+char =
+group[
+back1 |> move (0,0),
+myround |> move (0,0),
+myrect |>move (0,-5),
+myeye |>move (-5,3),
+myshine|>move (-5,3),
+myjet |> move (10,-2)
+]
+card =
+group[ back3|> move (0,0),
+char |> move (-40,0),
+back2 |> move (0,0),
+txt |> move (-65,25),
+sub |> move (-15,15),
+sub1 |> move (-11,10),
+sube |> move (-15,0),
+sube1 |> move (-11,-5),
+subm|> move (-15,-15),
+subm1|> move (-12,-20)
+] |> scale 0.3
+
+leftwal = group[
+
+walout |> move (0,-40),
+wal |> move (0,-40),
+wal2 |> move (0,-46),
+walout2 |> move (0,-52)]
+
+midwal = group[ mid |> move (30,-40),
+midout |> move(30,-40)]
+
+wallet = group[leftwal |> move (0,0),
+midwal |> move (0,0),
+leftwal |> move (60,0)]
+console = group [mycons5 |> move (30,0),
+mycons1 |> move (30,-40),
+mycons |> move (30,0),
+mycons3|> move (30,35),
+mycons4 |> move (30,44)]
+
+cover = group[ mycover|> move (0,-46),
+wal2 |> move (0,-46),
+walout2 |> move (0,-52)]
+
+arrow = polygon [(0,0),(70,0),(70,8),(80,-5),(70,-18), (70,-10),(0,-10)]
+|> filled black
+|> scale 0.5
+
+--Lights for the card swipe game
+rColours r = case r of
+LightRed -> rgb 255 0 0
+DarkRed -> rgb 150 0 0
+
+gColours g = case g of
+LightGreen -> rgb 0 255 0
+DarkGreen -> rgb 0 150 0
+
+--Reactor Task
+leaf1 = group [
+-- leaf and its colors
+curve (0,0) [Pull (-13,32) (81,28) ]
+|> filled (rgb 65 64 19),
+curve (0,0) [Pull (14,-40) (81,29) ]
+|> filled (rgb 65 64 19),
+curve (81,28) [Pull (30,-10) (30, 27) ]
+|> filled (rgb 201 150 68),
+curve (10,-13) [Pull (40,40) (-2, 6) ]
+|> filled (rgb 141 40 24),
+curve (10,-13) [Pull (0,-5) (-2, 6) ]
+|> filled (rgb 141 40 24),
+-- leaf outline
+curve (0,0) [Pull (-13,32) (81,28) ]
+|> outlined (solid 2) (rgb 82 37 2),
+curve (0,0) [Pull (14,-40) (81,29) ]
+|> outlined (solid 2) (rgb 82 37 2),
+-- leaf stem and veins
+line (-10, -10) (0, 0)
+|> outlined (solid 2) (rgb 82 37 2),
+line (0, -0.5) (40, 13)
+|> outlined (solid 1) (rgb 82 37 2),
+line (40, 13) (81,28)
+|> outlined (solid 1) (rgb 82 37 2),
+line (19,6) (30,27)
+|> outlined (solid 1) (rgb 82 37 2),
+line (18,6) (42,-6)
+|> outlined (solid 1) (rgb 82 37 2),
+line (45,14.6) (60,28)
+|> outlined (solid 1) (rgb 82 37 2),
+line (45,14.6) (70,18)
+|> outlined (solid 1) (rgb 82 37 2)
+] |> scale 0.3
+
+leaf2 = group [
+-- leaf and its colors
+curve (0,0) [Pull (-13,32) (81,28) ]
+|> filled (rgb 201 150 68),
+curve (0,0) [Pull (14,-40) (81,29) ]
+|> filled (rgb 201 150 68),
+curve (81,28) [Pull (30,-10) (30, 27) ]
+|> filled (rgb 65 64 19),
+curve (10,-13) [Pull (40,40) (-2, 6) ]
+|> filled (rgb 141 40 24),
+curve (10,-13) [Pull (0,-5) (-2, 6) ]
+|> filled (rgb 141 40 24),
+-- leaf outline
+curve (0,0) [Pull (-13,32) (81,28) ]
+|> outlined (solid 2) (rgb 82 37 2),
+curve (0,0) [Pull (14,-40) (81,29) ]
+|> outlined (solid 2) (rgb 82 37 2),
+-- leaf stem and veins
+line (-15, 0) (0, 0)
+|> outlined (solid 2) (rgb 82 37 2),
+line (0, -0.5) (40, 13)
+|> outlined (solid 1) (rgb 82 37 2),
+line (40, 13) (81,28)
+|> outlined (solid 1) (rgb 82 37 2),
+line (19,6) (30,27)
+|> outlined (solid 1) (rgb 82 37 2),
+line (18,6) (42,-6)
+|> outlined (solid 1) (rgb 82 37 2),
+line (45,14.6) (60,28)
+|> outlined (solid 1) (rgb 82 37 2),
+line (45,14.6) (70,18)
+|> outlined (solid 1) (rgb 82 37 2)
+] |> scale 0.3
+
+leaf3 = group [
+rect 10 15
+|> filled (rgb 65 64 19)
+|> move (-30,-5),
+polygon [(-29,10),(-28,-19),(1,-59),(1,44)]
+|> filled (rgb 65 64 19),
+polygon [(-4,10),(0,-19),(41,-35),(39,33)]
+|> filled (rgb 65 64 19),
+polygon [(37,10),(38,-19),(80,2)]
+|> filled (rgb 65 64 19)
+] |> scale 0.3
+
+--The background for the Reactor minigame
+background = group [
+square 120
+|> filled lightBlue,
+rect 30 120
+|> filled gray
+|> move (-45,0),
+polygon [p1,p2,p3,p4]
+|> filled charcoal
+,
+triangle 5
+|> filled red
+|> move (-56,0),
+triangle 3
+|> filled red
+|> rotate (degrees 180)
+|> move (-32,0)
+]
+
+{-
+p1-p4 are the four points of the trapezoid that makes up the garbage chute. They are predefined in order
+to facilitate the verification of any potentially destroyed leaves. It is important to note that the order of
+the points matter. All points MUST be adjacent to their neighbors, with p1 and p4 also being adjacent to
+each other. This is critical for checking if the mouse is currently inside the trapezoid.
+-}
+p1 = (-50.0,35.0)
+p2 = (-50.0,-35.0)
+p3 = (-35.0,-25.0)
+p4 = (-35.0,25.0)
+
+-- This is the location where leaves are moved once discarded. While it is also possible to turn the leaves
+-- invisible, this option is much simpler.
+destination = (150,0)
+
+{-
+The definition of a leaf, using a certain group "g", a position "p", a drag state of "d",
+a leaf number of "l", model.time as "t", and model.leaf as "ml".
+
+The leaf's physical model is drawn with "g", which is either "Leaf1", "Leaf2", or "Leaf3" above.
+
+If the leaf is currently selected, that is, if "l == ml" then the leaf is drawn to NOT spin.
+Otherwise, any unselected leaf would spin. The reason for that is that to simulate randomness for spinning
+leaves, the degrees is a function of their coordinates and time. However, if one would drag a spinning leaf,
+the leaf would start start rapidly swapping angles, as a result of a constantly moving position.
+
+If a leaf is being dragged, then an invisible "bounding box" is placed all over the screen that measures dragging and
+mouse movements. The square both detects the position of the mouse, and will detect if the mouse is lifted: i.e, the
+leaf is no longer being dragged. It also prevents leaves from being dragged outside off of the screen
+-}
+leaf g p d l t ml= group [
+if l == ml then
+g
+|> move p
+|> notifyMouseDown (SelectLeaf l)
+|>notifyMouseDown ReactorChangeDragState
+else
+g
+|> rotate (sin(Tuple.first(p)+Tuple.second(p))*t)
+|> move p
+|> notifyMouseDown (SelectLeaf l)
+|>notifyMouseDown ReactorChangeDragState
+,
+case d of
+Released -> group []
+Dragging ->
+
+square 120
+|> ghost
+|> notifyMouseMoveAt ReactorDrag
+|> notifyLeave ReactorChangeDragState
+|> notifyMouseUp ReactorChangeDragState
+
+]
+
+{-
+Method to calculate the area of a triangle from 3 points.
+Essential to determine if the mouse is currently on the vent.
+-}
+triangleArea : (Float,Float) -> (Float,Float) -> (Float,Float) -> Float
+triangleArea (x1,y1) (x2,y2) (x3,y3) = abs (0.5* ((x1*y2)-(x1*y3)+(x2*y3)-(x2*y1)+(x3*y1)-(x3*y2)))
+
+{-
+Method to determine if a point "p" is within the trapezoid used for the vent. It does so by checking the sum of all 4
+"internal triangles", where an "internal triangle" is a triangle between two adjacent vertecies of the trapezoid, and
+"p". If the sum of those 4 triangles matches (within a margin of error due to floating-point arithmetic) the area of
+the trapezoid, then the point is within the trapezoid.
+
+-}
+onVent : (Float,Float) -> Bool
+onVent (x,y) = let
+a1 = triangleArea p1 p2 (x,y)
+a2 = triangleArea p2 p3 (x,y)
+a3 = triangleArea p3 p4 (x,y)
+a4 = triangleArea p4 p1 (x,y)
+
+in if abs ((a1 + a2 + a3 + a4) - 900 ) < 0.01 then True else False
+
+{-
+Method to determine if every element in a list of coordinates has been moved to a "destination" global
+variable. This is intended for the coordinates of every leaf. Because the destination is offscreen, and
+can only be accessed by placing a leaf on the vent, this method can be used to see if every leaf has
+been moved: i.e, if the minigame has been completed successfully.
+
+It is recusive, with the empty list returning True, and any other list of the form (x:xs) returning
+allMoved xs if x is already at the destination.
+-}
+allMoved: List (Float,Float) -> Bool
+allMoved list = case list of
+(x::xs) -> if x == destination then allMoved xs else False
+[] -> True
+
+-- A homemade function to replace any given index in an array with any given value. It is 1-indexed.
+listReplace : List a -> Int -> a -> List a
+listReplace xs index v = (List.take (index-1) xs) ++ [v] ++ (List.drop index xs)
+
+-- A homemade method to return the nth element of an array. It is 1-indexed.
+listSelect : List a -> Int -> Maybe a
+listSelect xs index = List.head (List.drop (index-1) xs)
+
+-- Randomizes possible x-coordinates for the leaves. Ranges from -25 to 50.
+randX : Float -> Float
+randX x = (1.5*(sin (x)) + 0.5) * 25
+
+-- Randomizes possible y-coordinates for the leaves. Ranges from -50 to 50.
+randY : Float -> Float
+randY x = (sin(1.5*x))*50
+
+-- The victory screen upon successful completeion of the reactor minigame
+reactorWinScreen = group [
+rect 185 125
+|> ghost
+,
+rect 50 20
+|> filled green
+,
+text("Success")
+|> filled black |> move (-20,-5)
+]
+
+-- The failure screen upon the failure to complete the reactor minigame
+reactorLoseScreen = group [
+rect 185 125
+|> ghost
+,
+rect 90 20
+|> filled red
+,
+text("Failure! Try again")
+|> filled black |> move (-45,-5)
+]
+
+{-
+The invisble square which governs the winning and ending screen if the reactor minigame is over
+
+-}
+reactorSquare s t w = group [
+if allMoved w then
+reactorWinScreen |> notifyTap ReactorTaskSuccess
+else if t >= s + 30 && s > 0 then
+reactorLoseScreen |> notifyTap ReactorTaskFail
+else
+group []
+]
+
+myShapes model =
+
+case model.state of
+
+Cafeteria ->
+[
+roundedRect 80 15 2
+|> filled white
+|> move (0,3),
+
+text "Cafeteria"
+|> centered
+|> filled black
+
+,transitionButton ToMedBay P1LD
+,transitionButton ToUpperEngine P1L
+
+]
+UpperEngine ->
+[ text "UpperEngine"
+|> centered
+|> filled black
+,transitionButton ToReactor P2DL
+,transitionButton ToSecurity P2DR
+,transitionButton ToLowerEngine P2D
+]
+Medbay ->
+[ text "MedBay"
+|> centered
+|> filled black
+,transitionButton ToUpperEngine P1UL
+]
+LowerEngine ->
+[ text "LowerEngine"
+|> centered
+|> filled black
+,transitionButton ToElectrical P3DR
+,transitionButton ToStorage P3RDR
+]
+Reactor ->
+[ text "Reactor"
+|> centered
+|> filled black
+,transitionButton ToSecurity P2R
+,transitionButton ToLowerEngine P2RD
+,transitionButton ToCleanUp ReactorTask
+]
+Storage ->
+[ text "Storage"
+|> centered
+|> filled black
+,transitionButton ToCafeteria P4U
+,transitionButton ToAdmin P4UR
+]
+
+Security ->
+[ text "Security"
+|> centered
+|> filled black
+,transitionButton ToReactor P2L
+,transitionButton ToLowerEngine P2LD
+]
+
+Electrical ->
+[ text "Electrical"
+|> centered
+|> filled black
+,transitionButton ToStorage P3DR
+]
+
+SwipeCardTask ->
+[
+group[
+triangle 10
+|> filled (gColours model.gLight)
+|> scale 0.7
+|>move (88,0)
+|> rotate (degrees 180),
+
+rect 10 10
+|> filled (gColours model.gLight)
+|> scale 0.7
+|> scaleX 3
+|>move (75,0)
+|> rotate (degrees 180)
+],
+
+group [console, wallet,
+circle 5
+|> filled (gColours model.gLight)
+|> scale 1
+|> move (80,25),
+circle 5
+|> filled (rColours model.rLight)
+|> scale 1
+|> move (65,25),
+arrow |> move (-20,25)
+] |> move (-30,10)
+,text "Return"
+|> size 10
+|>filled (gColours model.gLight)
+|>move (-90,9)
+,rect 192 128
+|> outlined (solid 1) (black),
+
+card
+|> move model.pos
+|> case model.swipeDragState of
+Wallet -> notifyTap RestCard
+ReleasedCard _ -> notifyMouseDownAt StartDragging
+DraggingCard _ -> identity
+Finish -> identity
+,cover |> move (-30,10),
+
+if model.swipeDragState == Finish
+--The return arrow
+then group [
+triangle 10
+|> ghost
+|> scale 0.7
+|>move (88,0)
+|> rotate (degrees 180),
+
+rect 10 10
+|> ghost
+|> scale 0.7
+|> scaleX 3
+|>move (75,0)
+|> rotate (degrees 180)
+]|> notifyTap AdminTaskSuccess
+else
+group [],
+
+case model.swipeDragState of
+Wallet -> group[]
+ReleasedCard message -> text message
+|> customFont "Comic Sans MS"
+|> size 10
+|> filled (white)
+|> move (-48,50)
+
+DraggingCard _ -> rect 185 125
+|> ghost
+|> notifyMouseMoveAt Drag
+|> notifyMouseUpAt StopDragging
+|> notifyLeaveAt StopDragging
+Finish -> text "ACCEPTED"
+|> customFont "Comic Sans MS"
+|> size 10
+|> filled (white)
+|> move (-48,50)
+
+]
+Admin ->
+[ text "Admin"
+|> centered
+|> filled black
+,transitionButton ToCafeteria P4LU
+,transitionButton ToCardSwipe AdminTask
+
+]
+
+CleanUpTask ->
+[
+--Creates the background of the Reactor minigame
+background,
+
+--Populates the screen with 6 leaves in pseudorandom positions
+leaf leaf3 (Maybe.withDefault (0,0) (listSelect model.pList 1)) model.reactorDragState 1 model.time model.leaf,
+leaf leaf1 (Maybe.withDefault (0,0) (listSelect model.pList 2)) model.reactorDragState 2 model.time model.leaf,
+leaf leaf2 (Maybe.withDefault (0,0) (listSelect model.pList 3)) model.reactorDragState 3 model.time model.leaf,
+leaf leaf3 (Maybe.withDefault (0,0) (listSelect model.pList 4)) model.reactorDragState 4 model.time model.leaf,
+leaf leaf1 (Maybe.withDefault (0,0) (listSelect model.pList 5)) model.reactorDragState 5 model.time model.leaf,
+leaf leaf2 (Maybe.withDefault (0,0) (listSelect model.pList 6)) model.reactorDragState 6 model.time model.leaf,
+
+--Creates the measurement square that displays the victory/loss screen
+reactorSquare model.startTimeReactor model.time model.pList
+]
+
+
+type Msg = Tick Float GetKeyState
+| P2L
+| P2R
+| P2D
+| P2DL
+| P2DR
+| P1L
+| P1UL
+| P1LD
+| P2RD
+| P2LD
+| P3RDRU
+| P3RDR
+| P3DR
+| P4UR
+| P4U
+| P4LU
+| AdminTaskSuccess
+| AdminTask
+| AdminTaskFail
+| ReactorTaskFail
+| ReactorTaskSuccess
+| ReactorTask
+| ReactorDrag (Float, Float)
+| ReactorChangeDragState
+| SelectLeaf Int
+| ReactorStart (Float, Float)
+| Drag (Float, Float)
+| RestCard
+| StartDragging (Float, Float)
+| StopDragging (Float, Float)
+
+type State = Cafeteria
+| Medbay
+| Electrical
+| Reactor
+| Security
+| LowerEngine
+| UpperEngine
+| SwipeCardTask
+| Admin
+| Storage
+| CleanUpTask
+
+update msg model =
+case msg of
+Tick t _ ->
+{ model | time = t }
+--Dragging the Card
+Drag (x, y) -> { model |pos = case model.swipeDragState of
+DraggingCard _ -> if x < 60 then (x , 10)
+else (60,10)
+_ -> model.pos}
+
+StartDragging (x,y) -> {model |rLight=DarkRed, pos = (x,10), swipeDragState=DraggingCard(model.time)}
+StopDragging (x,y) -> case model.swipeDragState of
+DraggingCard startTime -> if model.time-startTime>2
+then {model | pos = (-30,10), swipeDragState =ReleasedCard("ERROR: TOO SLOW"), rLight = LightRed}
+else if model.time-startTime<1
+then {model | pos = (-30,10), swipeDragState =ReleasedCard("ERROR: TOO FAST"), rLight = LightRed}
+else if (x<60)
+then {model | pos = (-30,10), swipeDragState =ReleasedCard("ERROR: TRY AGAIN"), rLight = LightRed}
+else {model| swipeDragState = Finish,gLight = LightGreen}
+_ -> model
+
+RestCard -> {model | pos = (-30,10), swipeDragState = ReleasedCard ("SWIPE CARD")}
+
+P2L ->
+case model.state of
+Security ->
+{ model | state = Reactor }
+otherwise ->
+model
+P2R ->
+case model.state of
+Reactor ->
+{ model | state = Security }
+otherwise ->
+model
+P2D ->
+case model.state of
+UpperEngine ->
+{ model | state = LowerEngine }
+otherwise ->
+model
+P2DL ->
+case model.state of
+UpperEngine ->
+{ model | state = Reactor }
+otherwise ->
+model
+P2DR ->
+case model.state of
+UpperEngine ->
+{ model | state = Security }
+otherwise ->
+model
+P1L ->
+case model.state of
+Cafeteria ->
+{ model | state = UpperEngine }
+otherwise ->
+model
+P1UL ->
+case model.state of
+Medbay ->
+{ model | state = UpperEngine }
+otherwise ->
+model
+P1LD ->
+case model.state of
+Cafeteria ->
+{ model | state = Medbay }
+otherwise ->
+model
+P2RD ->
+case model.state of
+Reactor ->
+{ model | state = LowerEngine }
+otherwise ->
+model
+P2LD ->
+case model.state of
+Security ->
+{ model | state = LowerEngine }
+otherwise ->
+model
+P3RDRU ->
+case model.state of
+LowerEngine ->
+{ model | state = Electrical }
+otherwise ->
+model
+P3RDR ->
+case model.state of
+LowerEngine ->
+{ model | state = Storage }
+otherwise ->
+model
+P3DR ->
+case model.state of
+Electrical ->
+{ model | state = Storage }
+otherwise ->
+model
+P4UR ->
+case model.state of
+Storage ->
+{ model | state = Admin }
+otherwise ->
+model
+P4U ->
+case model.state of
+Storage ->
+{ model | state = Cafeteria }
+otherwise ->
+model
+P4LU ->
+case model.state of
+Admin ->
+{ model | state = Cafeteria }
+otherwise ->
+model
+AdminTaskSuccess ->
+case model.state of
+SwipeCardTask ->
+{ model | state = Admin }
+otherwise ->
+model
+AdminTask ->
+case model.state of
+Admin ->
+{ model | state = SwipeCardTask, swipeDragState = Wallet, pos = (-30,-25), rLight = DarkRed, gLight = DarkGreen }
+otherwise ->
+model
+AdminTaskFail ->
+case model.state of
+SwipeCardTask ->
+{ model | state = SwipeCardTask }
+otherwise ->
+model
+ReactorTaskFail ->
+case model.state of
+CleanUpTask -> --Re-initializes all values and positions for Reactor minigame
+{ model | state = CleanUpTask,
+allDoneReactor = False,
+pList = [(randX (model.time+0),randY (model.time+0)),(randX (model.time+10),randY (model.time+10))
+,(randX (model.time+100),randY (model.time+100)),(randX (model.time+200),randY (model.time+200))
+,(randX (model.time+20),randY (model.time+20)),(randX (model.time+50),randY (model.time+50))],
+startTimeReactor = model.time,
+leaf = 0}
+otherwise ->
+model
+ReactorTaskSuccess ->
+case model.state of
+CleanUpTask -> --resets all values and positions for Reactor minigame
+{ model | state = Reactor,
+allDoneReactor = False,
+pList = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)],
+startTimeReactor = 0,
+leaf = 0
+
+}
+otherwise ->
+model
+ReactorTask ->
+case model.state of
+Reactor -> --resets all values and positions for Reactor minigame
+{ model | state = CleanUpTask,
+pList = [(randX (model.time+0),randY (model.time+0)),(randX (model.time+10),randY (model.time+10))
+,(randX (model.time+100),randY (model.time+100)),(randX (model.time+200),randY (model.time+200))
+,(randX (model.time+20),randY (model.time+20)),(randX (model.time+50),randY (model.time+50))],
+startTimeReactor = model.time}
+otherwise ->
+model
+ReactorDrag (x, y) -> { model | withinTrapezoid = onVent (x,y),
+-- Checks if every leaf is moved
+allDoneReactor = allMoved(model.pList),
+-- Teleports the selected leaf off the edge if it's over the vent, otherwise, leaves (haha)
+-- it alone.
+pList = if model.withinTrapezoid == True && model.reactorDragState == Dragging then
+listReplace model.pList model.leaf destination
+else
+listReplace model.pList model.leaf (x,y)
+,
+-- Manually releases drag state if a leaf has been discarded. It checks if all the conditions
+-- to discard a leaf have been met, and then manually releases the drag.
+reactorDragState = if model.withinTrapezoid == True && model.reactorDragState == Dragging then
+Released
+else
+Dragging
+}
+-- Toggles the reactorDragState
+ReactorChangeDragState -> { model | reactorDragState = case model.reactorDragState of
+Released -> Dragging
+Dragging -> Released
+
+,
+-- Registers the mouse as being outside the trapezoid if it's not being dragged
+withinTrapezoid = case model.reactorDragState of
+Released -> False
+Dragging -> model.withinTrapezoid
+
+}
+-- Marks the desired leaf as selected
+SelectLeaf n -> {model | leaf = n}
+-- Measures when the reactor-minigame started. Defeat occurs at startTimeReactor + 30
+-- seconds
+ReactorStart (x,y) -> {model | startTimeReactor = model.time }
+
+-- Type alias for state diagram
+type alias Model =
+{ time : Float
+, state : State
+}
+-- Type of the state of dragging in the reactor
+type ReactorDragState = Released | Dragging
+type SwipeDragState = Wallet| ReleasedCard (String) | DraggingCard (Float)|Finish
+--Buttons for moving around the map
+type ButtonPosition = ToCafeteria | ToMedBay | ToUpperEngine | ToReactor | ToSecurity | ToLowerEngine | ToElectrical | ToStorage | ToAdmin | ToCleanUp | ToCardSwipe
+transitionButton : ButtonPosition -> Msg -> Shape Msg
+transitionButton pos msg = case pos of
+ToCafeteria -> group [roundedRect 60 15 2
+|> filled darkGrey
+, text "To Cafeteria"
+|> filled black
+|> scale 0.8
+|> move (-25, -5)
+] |> move (60, 20)
+|> notifyTap msg
+
+ToMedBay -> group [roundedRect 60 15 2
+|> filled lightBlue
+, text "To MedBay"
+|> filled black
+|> scale 0.8
+|> move (-22, -5)
+] |> move (0, 20)
+|> notifyTap msg
+
+ToUpperEngine -> group [roundedRect 80 15 2
+|> filled lightPurple
+, text "To Upper Engine"
+|> filled black
+|> scale 0.8
+|> move (-33, -5)
+] |> move (-50, 50)
+|> notifyTap msg
+
+ToReactor -> group [roundedRect 55 15 2
+|> filled darkGreen
+, text "To Reactor"
+|> filled black
+|> scale 0.8
+|> move (-22, -5)
+] |> move (-60, 20)
+|> notifyTap msg
+
+ToSecurity -> group [roundedRect 55 15 2
+|> filled darkRed
+, text "To Security"
+|> filled black
+|> scale 0.8
+|> move (-22, -5)
+] |> move (60, 20)
+|> notifyTap msg
+
+ToLowerEngine -> group [roundedRect 75 15 2
+|> filled orange
+, text "To Lower Engine"
+|> filled black
+|> scale 0.8
+|> move (-33, -5)
+] |> move (-55, -50)
+|> notifyTap msg
+
+ToElectrical -> group [roundedRect 60 15 2
+|> filled yellow
+, text "To Electrical"
+|> filled black
+|> scale 0.8
+|> move (-25, -5)
+] |> move (0, -30)
+|> notifyTap msg
+
+ToStorage -> group [roundedRect 50 15 2
+|> filled purple
+, text "To Storage"
+|> filled black
+|> scale 0.8
+|> move (-21, -5)
+] |> move (60, -50)
+|> notifyTap msg
+
+ToAdmin -> group [roundedRect 50 15 2
+|> filled red
+, text "To Admin"
+|> filled black
+|> scale 0.8
+|> move (-20, -5)
+] |> move (60, -15)
+|> notifyTap msg
+
+ToCleanUp -> group [roundedRect 60 15 2
+|> filled green
+, text "To Clean Up"
+|> filled black
+|> scale 0.8
+|> move (-25, -5)
+] |> move (0, 40)
+|> notifyTap msg
+
+ToCardSwipe -> group [roundedRect 70 15 2
+|> filled blue
+, text "To Card Swipe"
+|> filled black
+|> scale 0.8
+|> move (-30, -5)
+] |> move (0, 40)
+|> notifyTap msg
+
+init = { --Initialization of common variables
+time = 0 ,
+state = Cafeteria,
+
+--Initialization of variables for Reactor Minigame
+reactorDragState = Released,
+leaf = 0,
+pList = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)],
+startTimeReactor = 0,
+withinTrapezoid = False,
+allDoneReactor = False,
+swipeDragState = Wallet,
+pos = (-30,-25) ,
+rLight = DarkRed,
+gLight = DarkGreen
+}
